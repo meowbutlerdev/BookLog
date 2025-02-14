@@ -306,6 +306,8 @@
 /* Begin XCBuildConfiguration section */
 		BF2EAD6D2D5F2487004D91A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = BF2EAD422D5F2486004D91A5 /* BookLog */;
+			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
