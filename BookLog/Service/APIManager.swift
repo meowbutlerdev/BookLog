@@ -11,8 +11,19 @@ final class APIManager {
     static let shared = APIManager()
     private init() {}
 
-    private let baseURL = ""
-    private let apiKey = ""
+    private let baseURL: String = {
+        guard let url = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_BOOKS_BASE_URL") as? String else {
+            fatalError("GOOGLE_BOOKS_BASE_URL not found.")
+        }
+        return url
+    }()
+
+    private let apiKey: String = {
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_BOOKS_API_KEY") as? String else {
+            fatalError("GOOGLE_BOOKS_API_KEY not found.")
+        }
+        return key
+    }()
 
     func fetchBooks(query: String, completion: @escaping (Result<[BookAPIResponse], Error>) -> Void) {
         guard var urlComponents = URLComponents(string: baseURL) else { return }
