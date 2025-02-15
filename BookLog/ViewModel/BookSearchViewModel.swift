@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 final class BookSearchViewModel: ObservableObject {
     @Published var books: [BookAPIResponse] = []
@@ -28,6 +29,24 @@ final class BookSearchViewModel: ObservableObject {
                     self?.errorMessage = error.localizedDescription
                 }
             }
+        }
+    }
+
+    func addBookToLibrary(from bookResponse: BookAPIResponse) {
+        let context = CoreDataManager.shared.context
+        let newBook = Book(context: context)
+
+        newBook.id = UUID()
+        newBook.title = bookResponse.volumeInfo.title
+        newBook.author = bookResponse.volumeInfo.authors?.joined(separator: ", ")
+        newBook.publishedDate = bookResponse.volumeInfo.publishedDate
+        newBook.thumbnail = bookResponse.volumeInfo.imageLinks?.thumbnail
+        newBook.createdAt = Date()
+
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save book: \(error)")
         }
     }
 }
