@@ -47,6 +47,11 @@ final class BookListViewModel: NSObject, NSFetchedResultsControllerDelegate {
         saveContext()
     }
 
+    func deleteBook(_ book: Book) {
+        context.delete(book)
+        saveContext()
+    }
+
     private func saveContext() {
         do {
             try context.save()
