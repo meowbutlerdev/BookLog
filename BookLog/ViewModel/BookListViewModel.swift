@@ -50,6 +50,10 @@ final class BookListViewModel: NSObject, NSFetchedResultsControllerDelegate {
     func deleteBook(_ book: Book) {
         context.delete(book)
         saveContext()
+
+        if let index = books.firstIndex(of: book) {
+            books.remove(at: index)
+        }
     }
 
     func updateBook(_ book: Book, newTitle: String, newAuthor: String) {
@@ -70,5 +74,12 @@ final class BookListViewModel: NSObject, NSFetchedResultsControllerDelegate {
         if let fetchedBooks = controller.fetchedObjects as? [Book] {
             self.books = fetchedBooks
         }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .didUpdateBookList, object: nil)
+        }
     }
+}
+
+extension Notification.Name {
+    static let didUpdateBookList = Notification.Name("didUpdateBookList")
 }
