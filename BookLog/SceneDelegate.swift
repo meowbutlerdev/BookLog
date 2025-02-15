@@ -18,10 +18,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
-        let bookSearchVC = UINavigationController(rootViewController: BookSearchViewController())
-
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = bookSearchVC
+
+        let tabBarController = UITabBarController()
+
+        let bookSearchVC = UINavigationController(rootViewController: BookSearchViewController())
+        bookSearchVC.tabBarItem = UITabBarItem(title: "검색", image: UIImage(systemName: "magnifyingglass"), tag: 0)
+
+        let bookListVC = UINavigationController(rootViewController: BookListViewController())
+        bookListVC.tabBarItem = UITabBarItem(title: "내 서재", image: UIImage(systemName: "books.vertical"), tag: 1)
+
+        tabBarController.viewControllers = [bookSearchVC, bookListVC]
+
+        window.rootViewController = tabBarController
+
         self.window = window
         window.makeKeyAndVisible()
     }
