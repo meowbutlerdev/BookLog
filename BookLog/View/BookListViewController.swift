@@ -32,7 +32,11 @@ final class BookListViewController: UIViewController {
 
     private func setupBindings() {
         viewModel.$books.sink { [weak self] _ in
-            self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.tableView.beginUpdates()
+                self?.tableView.reloadSections(IndexSet(integer: 0), with: .automatic)
+                self?.tableView.endUpdates()
+            }
         }.store(in: &cancellables)
     }
 }
