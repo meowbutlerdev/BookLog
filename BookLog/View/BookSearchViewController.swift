@@ -24,6 +24,7 @@ final class BookSearchViewController: UIViewController {
     private func setupViews() {
         searchBar.delegate = self
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "BookCell")
 
         view.addSubview(searchBar)
@@ -67,7 +68,7 @@ extension BookSearchViewController: UISearchBarDelegate {
     }
 }
 
-extension BookSearchViewController: UITableViewDataSource {
+extension BookSearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.books.count
     }
