@@ -52,11 +52,23 @@ final class BookListViewModel: NSObject, NSFetchedResultsControllerDelegate {
         saveContext()
     }
 
+    func updateBook(_ book: Book, newTitle: String, newAuthor: String) {
+        book.title = newTitle
+        book.author = newAuthor
+        saveContext()
+    }
+
     private func saveContext() {
         do {
             try context.save()
         } catch {
             print("Failed to save context: \(error)")
+        }
+    }
+
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<any NSFetchRequestResult>) {
+        if let fetchedBooks = controller.fetchedObjects as? [Book] {
+            self.books = fetchedBooks
         }
     }
 }
