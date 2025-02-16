@@ -22,6 +22,7 @@ final class BookListViewModel: NSObject, NSFetchedResultsControllerDelegate {
     private func setupFetchedResultsController() {
         let fetchRequest: NSFetchRequest<Book> = Book.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        fetchRequest.fetchBatchSize = 20
 
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                               managedObjectContext: context,
