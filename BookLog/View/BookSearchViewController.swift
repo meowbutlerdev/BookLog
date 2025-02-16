@@ -24,6 +24,7 @@ final class BookSearchViewController: UIViewController {
     private func setupViews() {
         searchBar.delegate = self
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "BookCell")
 
         view.addSubview(searchBar)
@@ -40,7 +41,7 @@ final class BookSearchViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 
@@ -67,7 +68,7 @@ extension BookSearchViewController: UISearchBarDelegate {
     }
 }
 
-extension BookSearchViewController: UITableViewDataSource {
+extension BookSearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.books.count
     }
@@ -78,5 +79,18 @@ extension BookSearchViewController: UITableViewDataSource {
         cell.textLabel?.text = book.volumeInfo.title
 
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedBook = viewModel.books[indexPath.row]
+        viewModel.addBookToLibrary(from: selectedBook)
+
+        let alert = UIAlertController(
+            title: "추가 완료",
+            message: "책이 내 서재에 추가되었습니다.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }
