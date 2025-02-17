@@ -25,7 +25,7 @@ final class BookListViewController: UIViewController {
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "BookCell")
+        tableView.register(BookListCell.self, forCellReuseIdentifier: "BookListCell")
         view.addSubview(tableView)
         tableView.frame = view.bounds
     }
@@ -47,9 +47,12 @@ extension BookListViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "BookCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "BookListCell", for: indexPath) as?
+                BookListCell else {
+            fatalError("Failed to dequeue BookListCell")
+        }
         let book = viewModel.books[indexPath.row]
-        cell.textLabel?.text = book.title
+        cell.configure(with: book)
 
         return cell
     }
