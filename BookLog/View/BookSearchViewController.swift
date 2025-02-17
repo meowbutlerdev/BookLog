@@ -17,7 +17,6 @@ final class BookSearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "책 검색"
-        view.backgroundColor = .white
         setupViews()
         setupBindings()
     }
