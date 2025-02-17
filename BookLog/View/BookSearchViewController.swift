@@ -12,6 +12,7 @@ final class BookSearchViewController: UIViewController {
     private let viewModel = BookSearchViewModel()
     private let searchBar = UISearchBar()
     private let tableView = UITableView()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,9 +27,12 @@ final class BookSearchViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "BookCell")
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.center = view.center
 
         view.addSubview(searchBar)
         view.addSubview(tableView)
+        view.addSubview(activityIndicator)
 
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -53,6 +57,16 @@ final class BookSearchViewController: UIViewController {
         viewModel.$errorMessage.sink { errorMessage in
             if let message = errorMessage {
                 print("Error: \(message)")
+            }
+        }.store(in: &cancellables)
+
+        viewModel.$isLoading.sink { [weak self] isLoading in
+            DispatchQueue.main.async {
+                if isLoading {
+                    self?.activityIndicator.startAnimating()
+                } else {
+                    self?.activityIndicator.stopAnimating()
+                }
             }
         }.store(in: &cancellables)
     }
