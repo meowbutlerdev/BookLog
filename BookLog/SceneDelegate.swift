@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabBarController = UITabBarController()
 
         let bookSearchVC = UINavigationController(rootViewController: BookSearchViewController())
-        bookSearchVC.tabBarItem = UITabBarItem(title: "검색", image: UIImage(systemName: "magnifyingglass"), tag: 0)
+        bookSearchVC.tabBarItem = UITabBarItem(title: "책 검색", image: UIImage(systemName: "magnifyingglass"), tag: 0)
 
         let bookListVC = UINavigationController(rootViewController: BookListViewController())
         bookListVC.tabBarItem = UITabBarItem(title: "내 서재", image: UIImage(systemName: "books.vertical"), tag: 1)
