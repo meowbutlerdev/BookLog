@@ -22,6 +22,10 @@ final class BookListViewController: UIViewController {
         setupBindings()
     }
 
+    deinit {
+        cancellables.removeAll()
+    }
+
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self

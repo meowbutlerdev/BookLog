@@ -21,6 +21,10 @@ final class BookSearchViewController: UIViewController {
         setupBindings()
     }
 
+    deinit {
+        cancellables.removeAll()
+    }
+
     private func setupViews() {
         searchBar.delegate = self
         tableView.dataSource = self
