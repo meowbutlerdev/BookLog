@@ -23,7 +23,7 @@ extension Book {
     @NSManaged public var publishedDate: String?
     @NSManaged public var categories: String?
     @NSManaged public var createdAt: Date
-    @NSManaged public var reviews: NSSet?
+    @NSManaged public var review: Review?
 
 }
 

@@ -63,10 +63,10 @@ extension BookListViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedBook = viewModel.books[indexPath.row]
-        let editVC = BookEditViewController()
-        editVC.book = selectedBook
-        editVC.viewModel = viewModel
-        navigationController?.pushViewController(editVC, animated: true)
+        let bookReviewVC = BookReviewViewController()
+        bookReviewVC.existingBook = selectedBook
+//        bookReviewVC.viewModel = viewModel
+        navigationController?.pushViewController(bookReviewVC, animated: true)
     }
 
     func tableView(_ tableView: UITableView,
