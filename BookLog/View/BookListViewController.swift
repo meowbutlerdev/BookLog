@@ -7,41 +7,45 @@
 
 import UIKit
 import Combine
+import os
 
 final class BookListViewController: UIViewController {
     private let viewModel = BookListViewModel()
+    
     private var cancellables = Set<AnyCancellable>()
 
-    private let tableView = UITableView()
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(BookListCell.self, forCellReuseIdentifier: "BookListCell")
+        return tableView
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "내 서재"
-        view.backgroundColor = .white
-        setupTableView()
+        setupViews()
         setupBindings()
     }
 
     deinit {
+        os_log("%{public}@ deinitialized.", type: .info, String(describing: self))
         cancellables.removeAll()
     }
 
-    private func setupTableView() {
+    private func setupViews() {
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(BookListCell.self, forCellReuseIdentifier: "BookListCell")
         view.addSubview(tableView)
         tableView.frame = view.bounds
     }
 
     private func setupBindings() {
-        viewModel.$books.sink { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.tableView.beginUpdates()
-                self?.tableView.reloadSections(IndexSet(integer: 0), with: .automatic)
-                self?.tableView.endUpdates()
+        viewModel.$books
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
             }
-        }.store(in: &cancellables)
+            .store(in: &cancellables)
     }
 }
 
@@ -53,19 +57,17 @@ extension BookListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "BookListCell", for: indexPath) as?
                 BookListCell else {
-            fatalError("Failed to dequeue BookListCell")
+            os_log("Failed to dequeue BookListCell", type: .error)
+            return UITableViewCell()
         }
-        let book = viewModel.books[indexPath.row]
-        cell.configure(with: book)
-
+        cell.configure(with: viewModel.books[indexPath.row])
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedBook = viewModel.books[indexPath.row]
         let bookReviewVC = BookReviewViewController()
-        bookReviewVC.existingBook = selectedBook
-//        bookReviewVC.viewModel = viewModel
+        bookReviewVC.book = selectedBook
         navigationController?.pushViewController(bookReviewVC, animated: true)
     }
 

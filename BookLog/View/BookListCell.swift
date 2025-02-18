@@ -7,14 +7,45 @@
 
 import UIKit
 import SDWebImage
+import os
 
 final class BookListCell: UITableViewCell {
-    private let titleLabel = UILabel()
-    private let authorLabel = UILabel()
-    private let publishedDateLabel = UILabel()
-    private let thumbnailImageView = UIImageView()
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.numberOfLines = 2
+        return label
+    }()
 
-    private let textStackView = UIStackView()
+    private let authorLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 15)
+        return label
+    }()
+
+    private let publishedDateLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 12)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+
+    private let thumbnailImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 8
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    private let textStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 4
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -22,61 +53,41 @@ final class BookListCell: UITableViewCell {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        os_log("init(coder:) not implemented.", type: .error)
+        return nil
     }
 
     private func setupViews() {
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
-        authorLabel.font = UIFont.systemFont(ofSize: 15)
-        publishedDateLabel.font = UIFont.systemFont(ofSize: 12)
-
-        textStackView.axis = .vertical
-        textStackView.spacing = 4
         textStackView.addArrangedSubview(titleLabel)
         textStackView.addArrangedSubview(authorLabel)
         textStackView.addArrangedSubview(publishedDateLabel)
-
-        thumbnailImageView.contentMode = .scaleAspectFill
-        thumbnailImageView.clipsToBounds = true
-        thumbnailImageView.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        thumbnailImageView.heightAnchor.constraint(equalToConstant: 120).isActive = true
 
         let containerStackView = UIStackView(arrangedSubviews: [textStackView, thumbnailImageView])
         containerStackView.axis = .horizontal
         containerStackView.spacing = 8
         containerStackView.alignment = .center
+        containerStackView.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(containerStackView)
-        containerStackView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
             containerStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            containerStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
+            containerStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            thumbnailImageView.widthAnchor.constraint(equalToConstant: 80),
+            thumbnailImageView.heightAnchor.constraint(equalToConstant: 120)
         ])
     }
 
-    func configure(with bookResponse: BookAPIResponse) {
-        titleLabel.text = bookResponse.volumeInfo.title
-        authorLabel.text = bookResponse.volumeInfo.authors?.joined(separator: ", ") ?? "저자 없음"
-        publishedDateLabel.text = bookResponse.volumeInfo.publishedDate ?? "출판일 없음"
-        if let url = URL(string: bookResponse.volumeInfo.imageLinks?.thumbnail ?? "") {
-            thumbnailImageView.loadImage(from: url)
+    func configure(with book: BookDisplayable) {
+        titleLabel.text = book.displayTitle
+        authorLabel.text = book.displayAuthor
+        publishedDateLabel.text = book.displayPublishedDate
+        if let urlString = book.displayThumbnail, let url = URL(string: urlString) {
+            thumbnailImageView.sd_setImage(with: url,
+                                           placeholderImage: UIImage(systemName: "책 표지"),
+                                           options: [.refreshCached])
         }
-    }
-
-    func configure(with book: Book) {
-        titleLabel.text = book.title
-        authorLabel.text = book.author ?? "저자 없음"
-        publishedDateLabel.text = book.publishedDate ?? "출판일 없음"
-        if let url = URL(string: book.thumbnail ?? "") {
-            thumbnailImageView.loadImage(from: url)
-        }
-    }
-}
-
-extension UIImageView {
-    func loadImage(from url: URL) {
-        self.sd_setImage(with: url, placeholderImage: UIImage(systemName: "책 이미지"), options: .refreshCached)
     }
 }

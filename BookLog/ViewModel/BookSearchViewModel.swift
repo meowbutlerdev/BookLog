@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreData
+import os
 
 final class BookSearchViewModel: ObservableObject {
     @Published var books: [BookAPIResponse] = []
@@ -27,6 +28,7 @@ final class BookSearchViewModel: ObservableObject {
                     self?.books = books
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription
+                    os_log("API Error: %{public}@", type: .error, error.localizedDescription)
                 }
             }
         }
@@ -46,7 +48,7 @@ final class BookSearchViewModel: ObservableObject {
         do {
             try context.save()
         } catch {
-            print("Failed to save book: \(error)")
+            os_log("Failed to save book: %{public}@", type: .error, error.localizedDescription)
         }
     }
 }
