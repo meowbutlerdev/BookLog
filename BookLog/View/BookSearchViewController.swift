@@ -103,15 +103,5 @@ extension BookSearchViewController: UITableViewDataSource, UITableViewDelegate {
 
         addReviewVC.book = selectedBook
         navigationController?.pushViewController(addReviewVC, animated: true)
-
-//        viewModel.addBookToLibrary(from: selectedBook)
-//
-//        let alert = UIAlertController(
-//            title: "추가 완료",
-//            message: "책이 내 서재에 추가되었습니다.",
-//            preferredStyle: .alert
-//        )
-//        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-//        present(alert, animated: true, completion: nil)
     }
 }
