@@ -8,13 +8,13 @@
         <attribute name="publishedDate" optional="YES" attributeType="String"/>
         <attribute name="thumbnail" optional="YES" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
-        <relationship name="reviews" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Review" inverseName="book" inverseEntity="Review"/>
+        <relationship name="review" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Review" inverseName="book" inverseEntity="Review"/>
     </entity>
     <entity name="Review" representedClassName=".Review" syncable="YES">
-        <attribute name="comment" optional="YES" attributeType="String"/>
+        <attribute name="content" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="rating" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="book" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Book" inverseName="reviews" inverseEntity="Book"/>
+        <relationship name="book" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Book" inverseName="review" inverseEntity="Book"/>
     </entity>
 </model>

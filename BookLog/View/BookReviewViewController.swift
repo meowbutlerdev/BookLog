@@ -1,5 +1,5 @@
 //
-//  AddReviewViewController.swift
+//  BookReviewViewController.swift
 //  BookLog
 //
 //  Created by 박지성 on 2/17/25.
@@ -7,8 +7,9 @@
 
 import UIKit
 
-final class AddReviewViewController: UIViewController {
+final class BookReviewViewController: UIViewController {
     var book: BookAPIResponse?
+    var existingBook: Book?
 
     private let titleLabel = UILabel()
     private let authorLabel = UILabel()
@@ -24,6 +25,7 @@ final class AddReviewViewController: UIViewController {
         setupViews()
         setupRatingSlider()
         updateRatingStars()
+        loadExistingData()
     }
 
     private func setupViews() {
@@ -126,24 +128,40 @@ final class AddReviewViewController: UIViewController {
         }
     }
 
+    private func loadExistingData() {
+        if let existingBook = existingBook {
+            titleLabel.text = existingBook.title
+            authorLabel.text = existingBook.author
+            publishedDateLabel.text = existingBook.publishedDate
+            if let url = URL(string: existingBook.thumbnail ?? "") {
+                thumbnailImageView.sd_setImage(with: url)
+            }
+            reviewTextView.text = existingBook.review?.content
+            rating = existingBook.review?.rating ?? 2.5
+        }
+    }
+
     @objc private func saveButtonTapped() {
-        guard let book = book else { return }
         let context = CoreDataManager.shared.context
+        if let existingBook = existingBook {
+            existingBook.review?.content = reviewTextView.text
+            existingBook.review?.rating = rating
+        } else if let book = book {
+            let newBook = Book(context: context)
+            newBook.id = UUID()
+            newBook.title = book.volumeInfo.title
+            newBook.author = book.volumeInfo.authors?.joined(separator: ", ")
+            newBook.publishedDate = book.volumeInfo.publishedDate
+            newBook.thumbnail = book.volumeInfo.imageLinks?.thumbnail
+            newBook.createdAt = Date()
 
-        let newBook = Book(context: context)
-        newBook.id = UUID()
-        newBook.title = book.volumeInfo.title
-        newBook.author = book.volumeInfo.authors?.joined(separator: ", ")
-        newBook.publishedDate = book.volumeInfo.publishedDate
-        newBook.thumbnail = book.volumeInfo.imageLinks?.thumbnail
-        newBook.createdAt = Date()
-
-        let newReview = Review(context: context)
-        newReview.id = UUID()
-        newReview.comment = reviewTextView.text
-        newReview.rating = rating
-        newReview.createdAt = Date()
-        newReview.book = newBook
+            let newReview = Review(context: context)
+            newReview.id = UUID()
+            newReview.content = reviewTextView.text
+            newReview.rating = rating
+            newReview.createdAt = Date()
+            newReview.book = newBook
+        }
 
         do {
             try context.save()

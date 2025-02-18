@@ -103,9 +103,9 @@ extension BookSearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedBook = viewModel.books[indexPath.row]
-        let addReviewVC = AddReviewViewController()
+        let bookReviewVC = BookReviewViewController()
 
-        addReviewVC.book = selectedBook
-        navigationController?.pushViewController(addReviewVC, animated: true)
+        bookReviewVC.book = selectedBook
+        navigationController?.pushViewController(bookReviewVC, animated: true)
     }
 }
