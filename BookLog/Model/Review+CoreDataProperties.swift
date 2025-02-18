@@ -17,7 +17,7 @@ extension Review {
     }
 
     @NSManaged public var id: UUID
-    @NSManaged public var rating: Double
+    @NSManaged public var rating: Float
     @NSManaged public var comment: String?
     @NSManaged public var createdAt: Date
     @NSManaged public var book: Book?

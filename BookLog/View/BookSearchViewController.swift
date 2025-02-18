@@ -103,14 +103,9 @@ extension BookSearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedBook = viewModel.books[indexPath.row]
-        viewModel.addBookToLibrary(from: selectedBook)
+        let addReviewVC = AddReviewViewController()
 
-        let alert = UIAlertController(
-            title: "추가 완료",
-            message: "책이 내 서재에 추가되었습니다.",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
+        addReviewVC.book = selectedBook
+        navigationController?.pushViewController(addReviewVC, animated: true)
     }
 }
