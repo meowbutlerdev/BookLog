@@ -6,34 +6,30 @@
 //
 
 import CoreData
+import os
 
 final class CoreDataManager {
     static let shared = CoreDataManager()
-
     private init() {}
 
-    var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
-    }
+    var context: NSManagedObjectContext { persistentContainer.viewContext }
 
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "BookLog")
         container.loadPersistentStores { _, error in
             if let error = error {
-                fatalError("Unresolved error \(error)")
+                os_log("Persistent store loading failed: %{public}@", type: .error, error.localizedDescription)
             }
         }
         return container
     }()
 
     func saveContext() {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                print("Failed to save context: \(error)")
-            }
+        guard context.hasChanges else { return }
+        do {
+            try context.save()
+        } catch {
+            os_log("Failed to save context: %{public}@", type: .error, error.localizedDescription)
         }
     }
 }

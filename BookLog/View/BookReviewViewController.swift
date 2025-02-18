@@ -6,10 +6,10 @@
 //
 
 import UIKit
+import os
 
 final class BookReviewViewController: UIViewController {
-    var book: BookAPIResponse?
-    var existingBook: Book?
+    var book: BookDisplayable?
 
     private let titleLabel = UILabel()
     private let authorLabel = UILabel()
@@ -17,8 +17,14 @@ final class BookReviewViewController: UIViewController {
     private let thumbnailImageView = UIImageView()
     private let reviewTextView = UITextView()
     private let ratingView = UIStackView()
+    private let ratingContainer = UIView()
     private var rating: Float = 2.5 { didSet { updateRatingStars() } }
-    private let saveButton = UIButton(type: .system)
+    private lazy var saveButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("저장", for: .normal)
+        button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,77 +35,55 @@ final class BookReviewViewController: UIViewController {
     }
 
     private func setupViews() {
-        titleLabel.text = book?.volumeInfo.title
+        configureBookDetails()
+        configureReviewInput()
+        configureLayout()
+    }
+
+    private func configureBookDetails() {
         titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
         titleLabel.numberOfLines = 3
-
-        authorLabel.text = book?.volumeInfo.authors?.joined(separator: ", ") ?? "저자 없음"
         authorLabel.font = UIFont.systemFont(ofSize: 18)
-
-        publishedDateLabel.text = book?.volumeInfo.publishedDate ?? "발행일 없음"
         publishedDateLabel.font = UIFont.systemFont(ofSize: 18)
-
-        if let url = URL(string: book?.volumeInfo.imageLinks?.thumbnail ?? "") {
-            thumbnailImageView.sd_setImage(with: url,
-                                           placeholderImage: UIImage(systemName: "책 이미지"),
-                                           options: .refreshCached)
-        }
         thumbnailImageView.contentMode = .scaleAspectFit
+        if let urlString = book?.displayThumbnail, let url = URL(string: urlString) {
+            thumbnailImageView.sd_setImage(with: url,
+                                           placeholderImage: UIImage(systemName: "book"),
+                                           options: [.refreshCached])
+        }
+    }
 
+    private func configureReviewInput() {
         reviewTextView.layer.borderWidth = 1
         reviewTextView.layer.borderColor = UIColor.lightGray.cgColor
         reviewTextView.layer.cornerRadius = 8
         reviewTextView.font = UIFont.systemFont(ofSize: 16)
-        reviewTextView.isScrollEnabled = true
+    }
 
-        let ratingContainer = UIView()
+    private func configureLayout() {
         ratingView.axis = .horizontal
         ratingView.spacing = 8
         ratingView.alignment = .center
-        ratingContainer.addSubview(ratingView)
         ratingView.translatesAutoresizingMaskIntoConstraints = false
+
+        ratingContainer.addSubview(ratingView)
+
+        let infoStack = UIStackView(arrangedSubviews: [titleLabel, authorLabel, publishedDateLabel, thumbnailImageView])
+        infoStack.axis = .vertical
+        infoStack.spacing = 8
+        let mainStack = UIStackView(arrangedSubviews: [infoStack, ratingContainer, reviewTextView, saveButton])
+        mainStack.axis = .vertical
+        mainStack.spacing = 16
+        mainStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(mainStack)
         NSLayoutConstraint.activate([
+            mainStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            mainStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            mainStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            reviewTextView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.3),
             ratingView.centerXAnchor.constraint(equalTo: ratingContainer.centerXAnchor),
             ratingView.centerYAnchor.constraint(equalTo: ratingContainer.centerYAnchor)
         ])
-
-        saveButton.setTitle("저장", for: .normal)
-        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
-
-        let infoStackView = UIStackView(arrangedSubviews: [titleLabel, authorLabel,
-                                                           publishedDateLabel, thumbnailImageView])
-        infoStackView.axis = .vertical
-        infoStackView.spacing = 8
-
-        let mainStackView = UIStackView(arrangedSubviews: [infoStackView, ratingContainer,
-                                                           reviewTextView, saveButton])
-        mainStackView.axis = .vertical
-        mainStackView.spacing = 16
-        mainStackView.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(mainStackView)
-
-        NSLayoutConstraint.activate([
-            mainStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20 ),
-            mainStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            mainStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            reviewTextView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.3)
-        ])
-    }
-
-    private func setupRatingSlider() {
-        ratingView.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStarTap(_:)))
-        view.addGestureRecognizer(tapGesture)
-    }
-
-    @objc private func handleStarTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: ratingView)
-        let starWidth = ratingView.frame.width / 5
-        let tappedStar = min(Int(location.x / starWidth), 4)
-        let isHalf = location.x.truncatingRemainder(dividingBy: starWidth) < starWidth / 2
-
-        rating = Float(tappedStar) + (isHalf ? 0.5 : 1.0)
     }
 
     private func updateRatingStars() {
@@ -128,31 +112,47 @@ final class BookReviewViewController: UIViewController {
         }
     }
 
+    private func setupRatingSlider() {
+        ratingView.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleStarTap(_:)))
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func handleStarTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: ratingView)
+        let starWidth = ratingView.frame.width / 5
+        let tappedStar = min(Int(location.x / starWidth), 4)
+        let isHalf = location.x.truncatingRemainder(dividingBy: starWidth) < starWidth / 2
+
+        rating = Float(tappedStar) + (isHalf ? 0.5 : 1.0)
+    }
+
     private func loadExistingData() {
-        if let existingBook = existingBook {
-            titleLabel.text = existingBook.title
-            authorLabel.text = existingBook.author
-            publishedDateLabel.text = existingBook.publishedDate
-            if let url = URL(string: existingBook.thumbnail ?? "") {
-                thumbnailImageView.sd_setImage(with: url)
-            }
-            reviewTextView.text = existingBook.review?.content
-            rating = existingBook.review?.rating ?? 2.5
+        titleLabel.text = book?.displayTitle
+        authorLabel.text = book?.displayAuthor
+        publishedDateLabel.text = book?.displayPublishedDate
+
+        if let urlString = book?.displayThumbnail, let url = URL(string: urlString) {
+            thumbnailImageView.sd_setImage(with: url,
+                                           placeholderImage: UIImage(systemName: "book"),
+                                           options: [.refreshCached])
         }
+        reviewTextView.text = book?.displayReviewContent
+        rating = book?.displayRating ?? 2.5
     }
 
     @objc private func saveButtonTapped() {
         let context = CoreDataManager.shared.context
-        if let existingBook = existingBook {
-            existingBook.review?.content = reviewTextView.text
-            existingBook.review?.rating = rating
-        } else if let book = book {
+        if let book = book as? Book {
+            book.review?.content = reviewTextView.text
+            book.review?.rating = rating
+        } else if let bookAPI = book as? BookAPIResponse {
             let newBook = Book(context: context)
             newBook.id = UUID()
-            newBook.title = book.volumeInfo.title
-            newBook.author = book.volumeInfo.authors?.joined(separator: ", ")
-            newBook.publishedDate = book.volumeInfo.publishedDate
-            newBook.thumbnail = book.volumeInfo.imageLinks?.thumbnail
+            newBook.title = bookAPI.volumeInfo.title
+            newBook.author = bookAPI.volumeInfo.authors?.joined(separator: ", ")
+            newBook.publishedDate = bookAPI.volumeInfo.publishedDate
+            newBook.thumbnail = bookAPI.volumeInfo.imageLinks?.thumbnail
             newBook.createdAt = Date()
 
             let newReview = Review(context: context)
@@ -166,7 +166,7 @@ final class BookReviewViewController: UIViewController {
         do {
             try context.save()
         } catch {
-            print("Failed to save context: \(error)")
+            os_log("Failed to save context: %{public}@", type: .error, error.localizedDescription)
         }
 
         navigationController?.popViewController(animated: true)
